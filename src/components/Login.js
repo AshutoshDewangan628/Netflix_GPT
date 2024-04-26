@@ -2,11 +2,20 @@ import React, { useRef } from 'react'
 import Header from './Header'
 import { useState } from 'react';
 import { checkvalidation } from '../utils/Validation';
+import {createUserWithEmailAndPassword,signInWithEmailAndPassword} from "firebase/auth";
+import { auth } from '../utils/Firebase';
+import { useNavigate } from 'react-router-dom';
+import {updateProfile } from "firebase/auth";
+import { useDispatch } from 'react-redux';
+import { addUser } from '../utils/userSlice';
 
 const Login = () => {
+  const dispatch=useDispatch();
+  const navigate=useNavigate();
   const [issignin,setIssignin]=useState(true);
   const [errormessage,setErrormessage]=useState(null);
 
+  const name=useRef(null);
   const email=useRef(null);
   const password=useRef(null);
   
@@ -17,6 +26,53 @@ const Login = () => {
   const handleButton=()=>{
     const message=checkvalidation(email.current.value,password.current.value);
     setErrormessage(message);
+
+    if(message) return;
+    if(!issignin){
+    createUserWithEmailAndPassword(auth,email.current.value,password.current.value)
+      .then((userCredential) => {
+          // Signed up 
+          const user = userCredential.user;
+          
+          updateProfile(user, {
+            displayName:name.current.value
+          }).then(() => {
+            const {uid,email,displayName} = auth.currentUser;
+            dispatch(addUser({uid:uid,email:email,displayName:displayName}));
+            navigate("/browser")
+          }).catch((error) => {
+            // An error occurred
+            // ...
+          });
+          
+          navigate("/browser");
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrormessage(errorCode+"-"+errorMessage)
+          // ..
+        });
+    }
+    else{
+      //signIn
+        signInWithEmailAndPassword(auth, email.current.value,password.current.value)
+        .then((userCredential) => {
+            // Signed in 
+            const user = userCredential.user;
+            console.log(user)
+            
+            navigate("/browser")
+            // ...
+          })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        setErrormessage(errorCode+errorMessage)
+      });
+    }
+
+
   }
   return (
     <div>
@@ -29,7 +85,7 @@ const Login = () => {
       }} className='absolute w-3/12 p-12 bg-black text-white my-36 mx-auto right-0 left-0 rounded-lg bg-opacity-80'>
         
         <h1 className='text-3xl'>{issignin ?"Sign In":"Sign Up"}</h1>
-        {!issignin && (<input type="Name" placeholder='Full Name'
+        {!issignin && (<input ref={name} type="Name" placeholder='Full Name'
           className='p-3 my-4 w-full bg-gray-800'
         />)}
         <input ref={email}
