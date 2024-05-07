@@ -1,17 +1,15 @@
-import React, { useRef } from 'react'
+import React, {useRef} from 'react'
 import Header from './Header'
 import { useState } from 'react';
 import { checkvalidation } from '../utils/Validation';
 import {createUserWithEmailAndPassword,signInWithEmailAndPassword} from "firebase/auth";
 import { auth } from '../utils/Firebase';
-import { useNavigate } from 'react-router-dom';
 import {updateProfile } from "firebase/auth";
 import { useDispatch } from 'react-redux';
 import { addUser } from '../utils/userSlice';
 
 const Login = () => {
   const dispatch=useDispatch();
-  const navigate=useNavigate();
   const [issignin,setIssignin]=useState(true);
   const [errormessage,setErrormessage]=useState(null);
 
@@ -39,13 +37,11 @@ const Login = () => {
           }).then(() => {
             const {uid,email,displayName} = auth.currentUser;
             dispatch(addUser({uid:uid,email:email,displayName:displayName}));
-            navigate("/browser")
           }).catch((error) => {
             // An error occurred
             // ...
           });
           
-          navigate("/browser");
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -60,9 +56,6 @@ const Login = () => {
         .then((userCredential) => {
             // Signed in 
             const user = userCredential.user;
-            console.log(user)
-            
-            navigate("/browser")
             // ...
           })
       .catch((error) => {
@@ -71,8 +64,6 @@ const Login = () => {
         setErrormessage(errorCode+errorMessage)
       });
     }
-
-
   }
   return (
     <div>
@@ -103,9 +94,7 @@ const Login = () => {
         className='cursor-pointer'
         >{issignin ? "New to netflix? Signup now" : "Registered User? SignIn Now"}</p>
       </form>
-
-  </div>
+   </div>
   )
 }
-
 export default Login
