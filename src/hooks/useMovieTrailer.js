@@ -4,6 +4,7 @@ import { addTrailerVideo } from '../utils/movieSlice';
 import { useEffect } from 'react';
 const useMovieTrailer = (movieID) => {
     const dispatch=useDispatch();
+
     const getMoviesVideo=async()=>{
         const data=await fetch("https://api.themoviedb.org/3/movie/"+movieID+"/videos?language=en-US",API_options)
         const json=await data.json();
@@ -12,6 +13,7 @@ const useMovieTrailer = (movieID) => {
         dispatch(addTrailerVideo(trailer));
     }
     useEffect(()=>{
+
         getMoviesVideo();
     },[])
 }
